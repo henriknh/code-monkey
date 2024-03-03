@@ -1,21 +1,40 @@
 import * as vscode from "vscode";
 
 const MINUTE = 60000;
-const PERIOD_LENGTH = 5000;
+const RECENT_PERIOD = 5000;
 
 export class APM {
-  private actionsDuringPeriod = 0;
+  private actionsPerMinute = 0;
+  private actionsPerPeriod = 0;
+  private lastActionTimeStamp = 0;
 
-  constructor() {
-    vscode.workspace.onDidChangeTextDocument(() => this.increment());
+  constructor(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeTextDocument((e) => {
+        if (e.contentChanges?.[0].text.length === 1) {
+          this.increment();
+        }
+      })
+    );
   }
 
   increment() {
-    this.actionsDuringPeriod++;
-    setTimeout(() => this.actionsDuringPeriod--, PERIOD_LENGTH);
+    this.actionsPerMinute++;
+    this.actionsPerPeriod++;
+    this.lastActionTimeStamp = performance.now();
+    setTimeout(() => this.actionsPerMinute--, MINUTE);
+    setTimeout(() => this.actionsPerPeriod--, RECENT_PERIOD);
   }
 
-  getApm() {
-    return this.actionsDuringPeriod * (MINUTE / PERIOD_LENGTH);
+  getActionsPerMinute() {
+    return this.actionsPerMinute;
+  }
+
+  getActionsPerPeriod() {
+    return this.actionsPerPeriod;
+  }
+
+  timeSinceLastAction() {
+    return performance.now() - this.lastActionTimeStamp;
   }
 }

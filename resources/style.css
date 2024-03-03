@@ -147,9 +147,8 @@ body {
 
 .bottom .monkey-arm {
   position: absolute;
-  height: 50%;
-  bottom: -8%;
-  /* transform: translateY(100px); */
+  height: 55%;
+  bottom: -13%;
   transition: all 250ms;
 }
 
@@ -161,55 +160,10 @@ body {
   right: 30%;
 }
 
-.bottom .arm-animation {
-  /* animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
-  animation-fill-mode: forwards; */
-}
-
 .bottom #arm-animation-left {
   transform-origin: 20px 180px;
-  /* animation-name: animation-left-arm; */
 }
 
 .bottom #arm-animation-right {
   transform-origin: 80px 180px;
-  /* animation-name: animation-right-arm; */
-  /* animation-delay: 69ms; */
-}
-
-@keyframes animation-left-arm {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  25% {
-    transform: rotate(1deg) scale(1.05);
-  }
-  50% {
-    transform: rotate(3deg) scale(1);
-  }
-  75% {
-    transform: rotate(1deg) scale(1.05);
-  }
-  100% {
-    transform: rotate(0deg) scale(1);
-  }
-}
-
-@keyframes animation-right-arm {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  25% {
-    transform: rotate(-1deg) scale(1.05);
-  }
-  50% {
-    transform: rotate(-2deg) scale(1);
-  }
-  75% {
-    transform: rotate(-1deg) scale(1.05);
-  }
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
 }

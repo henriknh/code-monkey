@@ -4,8 +4,6 @@ import { APM } from "./apm";
 const UPDATE_INTERVAL = 100;
 
 export class StatusBarItem {
-  visible = true;
-
   statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     1000
@@ -15,39 +13,60 @@ export class StatusBarItem {
 
   constructor(context: vscode.ExtensionContext, public apm: APM) {
     this.statusBarItem.tooltip = "Actions per minute";
-    this.show();
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("code-monkey.toggleStatusBarItem", () => {
-        this.toggle();
-      })
+      vscode.workspace.onDidChangeConfiguration(
+        (e: vscode.ConfigurationChangeEvent): void => this.reload()
+      )
+    );
+
+    setTimeout(() => this.reload());
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "lfw-codes-for-bananas.toggleStatusBarItem",
+        () => this.toggle()
+      )
     );
   }
 
-  private toggle() {
-    if (this.visible) {
+  private reload() {
+    this.isEnabled ? this.show() : this.hide();
+  }
+
+  get isEnabled() {
+    return vscode.workspace
+      .getConfiguration("lfw-codes-for-bananas")
+      .get<boolean>("showAPM", true);
+  }
+
+  toggle() {
+    if (this.isEnabled) {
       this.hide();
     } else {
       this.show();
     }
   }
 
-  private show() {
+  show() {
     this.update();
     this.statusBarItem.show();
     clearInterval(this.interval);
     this.interval = setInterval(() => this.update(), UPDATE_INTERVAL);
-    this.visible = true;
+    vscode.workspace
+      .getConfiguration("lfw-codes-for-bananas")
+      .set("showAPM", true);
   }
 
-  private hide() {
+  hide() {
     this.statusBarItem.hide();
     clearInterval(this.interval);
-    this.interval = undefined;
-    this.visible = false;
+    vscode.workspace
+      .getConfiguration("lfw-codes-for-bananas")
+      .set("showAPM", false);
   }
 
   update() {
-    this.statusBarItem.text = `$(record-keys) ${this.apm.getApm()}`;
+    this.statusBarItem.text = `$(record-keys) ${this.apm.getActionsPerMinute()}`;
   }
 }

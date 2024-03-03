@@ -3,38 +3,37 @@ console.log("Script loading!");
 let runningTimer = null;
 let pomodoroTimeLeft = 0;
 let pauseTimeLeft = 0;
-let armsAnimationTimer = null;
 
 // document.getElementById("pomodoro").style.display = "flex";
 // document.getElementById("pause").style.display = "none";
 
 window.addEventListener("message", (event) => {
-  const message = event.data; // The json data that the extension sent
-
-  switch (message.type) {
-    case "update_apm":
-      updateAPM(message.value);
-      break;
-  }
+  const { actionsPerMinute, actionsPerPeriod, timeSinceLastAction } =
+    event.data;
+  updateAPM(actionsPerMinute, actionsPerPeriod, timeSinceLastAction);
 });
 
-let apm = 0;
-let hideArmsTimer = null;
+let actionsPerMinute = 0;
+let actionsPerPeriod = 0;
 
-const updateAPM = (apmValue) => {
-  if (apm !== apmValue) {
-    if (apm === 0 && apmValue > 0) {
-      clearTimeout(hideArmsTimer);
-      showArms();
-    }
+const updateAPM = (
+  _actionsPerMinute,
+  _actionsPerPeriod,
+  timeSinceLastAction
+) => {
+  actionsPerMinute = _actionsPerMinute;
+  actionsPerPeriod = _actionsPerPeriod;
 
-    if (apm > 0 && apmValue === 0) {
-      hideArmsTimer = setTimeout(() => hideArms(), 2500);
-    }
-
-    apm = apmValue;
+  if (isArmsShowing && timeSinceLastAction > 2000) {
+    hideArms();
+  } else if (!isArmsShowing && timeSinceLastAction < 1000) {
+    showArms();
   }
 };
+
+/**
+ * POMODORO TIMER
+ */
 
 document.body.addEventListener("click", () => {
   return;
@@ -152,39 +151,51 @@ const updatePauseTimer = () => {
   secondSecond.innerHTML = pauseTimeLeft % 10;
 };
 
+/**
+ * ANIMATIONS
+ */
+
+let isArmsShowing = false;
+let updateMonkeyArmFrequencyTimer;
+
+let showArmsTimer = null;
 const showArms = () => {
   console.log("showArms");
+
+  isArmsShowing = true;
 
   const arms = document.getElementsByClassName("monkey-arm");
   for (const arm of arms) {
     arm.style.transform = "translateY(0px)";
   }
 
-  currentmonkeyArmFrequency = 0;
-  clearTimeout(armsAnimationTimer);
-  armsAnimationTimer = setTimeout(() => {
-    updateMonkeyArmFrequency();
-  }, 500);
+  clearTimeout(hideArmsTimer);
+  clearTimeout(showArmsTimer);
+  // showArmsTimer = setTimeout(() => {
+  lastUpdate = performance.now();
+  updateMonkeyArmFrequency();
+  // }, 500);
 };
 
+let hideArmsTimer = null;
 const hideArms = () => {
   console.log("hideArms");
 
-  clearTimeout(armsAnimationTimer);
-  updateMonkeyArmFrequency();
+  isArmsShowing = false;
+
   clearTimeout(updateMonkeyArmFrequencyTimer);
 
-  const arms = document.getElementsByClassName("monkey-arm");
-  for (const arm of arms) {
-    setTimeout(() => {
-      arm.style.transform = "translateY(100px)";
-    });
-  }
+  clearTimeout(showArmsTimer);
+  clearTimeout(hideArmsTimer);
+  hideArmsTimer = setTimeout(() => {
+    const arms = document.getElementsByClassName("monkey-arm");
+    for (const arm of arms) {
+      setTimeout(() => {
+        arm.style.transform = "translateY(100px)";
+      });
+    }
+  }, 500);
 };
-
-let updateMonkeyArmFrequencyTimer;
-let currentmonkeyArmFrequency = 0;
-const armAnimations = document.getElementsByClassName("arm-animation");
 
 const UPDATE_FREQUENCY = 16.666;
 let lastUpdate = 0;
@@ -197,33 +208,27 @@ const updateMonkeyArmFrequency = () => {
   let delta = performance.now() - lastUpdate;
   lastUpdate = performance.now();
 
-  rotation += ROTATION_SPEED * delta;
+  rotation += ROTATION_SPEED * (actionsPerPeriod / 10) * delta;
+  scale += SCALE_SPEED * (actionsPerPeriod / 10) * delta;
+  updateArmAnimation();
 
-  scale += SCALE_SPEED * delta;
-
-  //   const animationSpeed = parseInt(100000 / Math.max(apm, 10));
-
-  //   currentmonkeyArmFrequency = lerp(
-  //     currentmonkeyArmFrequency,
-  //     animationSpeed,
-  //     0.033333
-  //   );
-
-  //   const i = parseInt(currentmonkeyArmFrequency / 100) * 100;
-  //   console.log(i, apm);
-
-  for (const armAnimation of armAnimations) {
-    armAnimation.style.transform = `rotate(${wrapInMiddle(
-      rotation,
-      5
-    )}deg) scale(${1 + wrapInMiddle(scale, 0.1)})`;
-  }
-
-  clearTimeout(updateMonkeyArmFrequencyTimer);
   updateMonkeyArmFrequencyTimer = setTimeout(
-    () => updateMonkeyArmFrequency(),
+    updateMonkeyArmFrequency,
     UPDATE_FREQUENCY
   );
+};
+
+const leftArmAnimation = document.getElementById("arm-animation-left");
+const rightArmAnimation = document.getElementById("arm-animation-right");
+const updateArmAnimation = () => {
+  leftArmAnimation.style.transform = `rotate(${wrapInMiddle(
+    rotation,
+    5
+  )}deg) scale(${1 + wrapInMiddle(scale, 0.1)})`;
+  rightArmAnimation.style.transform = `rotate(${wrapInMiddle(
+    rotation * 0.99,
+    5
+  )}deg) scale(${1 + wrapInMiddle(scale * 0.99, 0.1)})`;
 };
 
 function lerp(from, to, delta) {

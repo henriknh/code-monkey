@@ -1,8 +1,8 @@
 {
-  "name": "code-monkey",
-  "displayName": "Code Monkey",
-  "description": "Code Monkey - A time management extension with the pomodoro technique",
-  "version": "0.0.1",
+  "name": "lfw-codes-for-bananas",
+  "displayName": "LFW: Codes for bananas",
+  "description": "A time management extension with the pomodoro technique",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -14,10 +14,26 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": [
+      {
+        "properties": {
+          "lfw-codes-for-bananas.showAPM": {
+            "order": 1,
+            "type": "boolean",
+            "default": true,
+            "description": "Show the actions per minute, APM, counter in the status bar."
+          }
+        }
+      }
+    ],
     "commands": [
       {
-        "command": "code-monkey.toggleStatusBarItem",
-        "title": "Toggle APM  in status bar",
+        "command": "lfw-codes-for-bananas.hireCodeMonkey",
+        "title": "LFW: Codes for bananas: Hire a coding monkey"
+      },
+      {
+        "command": "lfw-codes-for-bananas.toggleStatusBarItem",
+        "title": "LFW: Codes for bananas: Toggle APM  in status bar",
         "icon": {
           "light": "resources/icons/keyboard.png",
           "dark": "resources/icons/keyboard.png"
