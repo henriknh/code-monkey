@@ -1,8 +1,8 @@
 {
   "name": "lfw-codes-for-bananas",
   "displayName": "LFW: Codes for bananas",
-  "description": "A time management extension with the pomodoro technique",
-  "version": "1.0.1",
+  "description": "A coding companion typing away on its keyboard alongside you",
+  "version": "1.0.2",
   "license": "MIT",
   "publisher": "henriknh",
   "repository": {
