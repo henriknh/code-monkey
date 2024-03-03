@@ -3,6 +3,10 @@
   "displayName": "LFW: Codes for bananas",
   "description": "A time management extension with the pomodoro technique",
   "version": "1.0.0",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/henriknh/lfw-codes-for-bananas"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
